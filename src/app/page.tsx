@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BIG_TEAMS, calendar, demoFixtures, opponent, type Fixture } from "@/lib/fixtures";
+import { BIG_TEAMS, calendar, demoFixtures, opponent, type Fixture, type Team } from "@/lib/fixtures";
 
 type Mode = "all" | "big" | "opponents";
+function TeamCrest({ team }: { team: Team }) {
+  const [failed, setFailed] = useState(false);
+  if (!team.crest || failed) {
+    return <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-[10px] font-semibold text-neutral-500">{team.name.split(" ").map(word => word[0]).slice(0, 3).join("")}</span>;
+  }
+  // Render provider assets directly without requiring a server image proxy.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={team.crest} alt="" width={32} height={32} loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)} className="size-8 shrink-0 object-contain" />;
+}
+
 export default function Home() {
   const [matches, setMatches] = useState<Fixture[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +75,7 @@ export default function Home() {
   const selectable = filtered.filter(match => match.confirmed);
   const allSelected = selectable.length > 0 && selected.length === selectable.length;
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-8 sm:py-12">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-12">
       <header className="mb-8">
         <p className="text-sm font-semibold text-neutral-500">Fixtures</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">Barcelona matches</h1>
@@ -134,28 +144,35 @@ export default function Home() {
             {matches.length ? "No matches for these filters." : "No upcoming matches available."}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
-            <div className="border-b border-neutral-200 px-4 py-3">
-              <label className="inline-flex cursor-pointer items-center gap-3 text-sm">
-                <input type="checkbox" checked={allSelected} disabled={!selectable.length} onChange={() => { const ids = selectable.map(m => m.id); setExcluded(current => allSelected ? [...new Set([...current, ...ids])] : current.filter(id => !ids.includes(id))); setNotice(""); }} className="size-4 accent-neutral-900" />
-                Select all
-              </label>
+          <div>
+            <label className="mb-3 inline-flex cursor-pointer items-center gap-2 text-sm">
+              <input type="checkbox" checked={allSelected} disabled={!selectable.length} onChange={() => { const ids = selectable.map(m => m.id); setExcluded(current => allSelected ? [...new Set([...current, ...ids])] : current.filter(id => !ids.includes(id))); setNotice(""); }} className="size-4 accent-neutral-900" />
+              Select all
+            </label>
+            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              {filtered.map(match => (
+                <label key={match.id} className={`flex min-w-0 flex-col rounded-lg border bg-white p-4 transition-colors focus-within:ring-2 focus-within:ring-neutral-500 ${!match.confirmed ? "border-dashed border-neutral-200 text-neutral-500" : !excluded.includes(match.id) ? "cursor-pointer border-neutral-400 hover:border-neutral-600" : "cursor-pointer border-neutral-200 hover:border-neutral-400"}`}>
+                  <div className="mb-4 flex items-start justify-between gap-2">
+                    <p className="min-w-0 text-xs text-neutral-500">{match.competition} · {match.home.id === 81 ? "Home" : "Away"}</p>
+                    <input type="checkbox" aria-label={`Select ${match.home.name} vs ${match.away.name}`} disabled={!match.confirmed} checked={match.confirmed && !excluded.includes(match.id)} onChange={() => toggle(match.id)} className="size-4 shrink-0 accent-neutral-900" />
+                  </div>
+                  <div className="space-y-3">
+                    {[match.home, match.away].map(team => (
+                      <div key={team.id} className="flex min-w-0 items-center gap-3">
+                        <TeamCrest key={`${team.id}-${team.crest}`} team={team} />
+                        <span className="min-w-0 text-sm font-medium leading-snug break-words">{team.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-auto pt-4">
+                    <div className="border-t border-neutral-100 pt-3 text-xs text-neutral-600">
+                      <p>{new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", weekday: "short", year: "numeric", ...(match.confirmed ? { hour: "2-digit", minute: "2-digit" } : {}), timeZone: timezone }).format(new Date(match.date))}</p>
+                      {!match.confirmed && <p className="mt-1 text-neutral-500">Provisional date · Kickoff unconfirmed</p>}
+                    </div>
+                  </div>
+                </label>
+              ))}
             </div>
-            {filtered.map(match => (
-              <label key={match.id} className={`flex items-start gap-3 border-b border-neutral-100 px-4 py-4 last:border-b-0 sm:items-center ${match.confirmed ? "cursor-pointer hover:bg-neutral-50" : "text-neutral-500"}`}>
-                <input type="checkbox" aria-label={`Select ${match.home.name} vs ${match.away.name}`} disabled={!match.confirmed} checked={match.confirmed && !excluded.includes(match.id)} onChange={() => toggle(match.id)} className="mt-0.5 size-4 shrink-0 accent-neutral-900 sm:mt-0" />
-                <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-4">
-                  <div>
-                    <p className="text-sm font-medium">{match.home.name} <span className="font-normal text-neutral-400">vs</span> {match.away.name}</p>
-                    <p className="mt-1 text-xs text-neutral-500">{match.competition} · {match.home.id === 81 ? "Home" : "Away"}</p>
-                  </div>
-                  <div className="shrink-0 text-xs text-neutral-600 sm:text-right">
-                    <p>{new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", weekday: "short", year: "numeric", ...(match.confirmed ? { hour: "2-digit", minute: "2-digit" } : {}), timeZone: timezone }).format(new Date(match.date))}</p>
-                    {!match.confirmed && <p className="mt-1 text-neutral-500">Provisional date · Kickoff unconfirmed</p>}
-                  </div>
-                </div>
-              </label>
-            ))}
           </div>
         )}
         <div className="sticky bottom-0 mt-4 border-t border-neutral-200 bg-[#fafafa]/95 py-4 backdrop-blur-sm">

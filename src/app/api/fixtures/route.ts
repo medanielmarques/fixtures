@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { BARCELONA, type Fixture } from "@/lib/fixtures";
+import { BARCELONA, type Fixture, type Team } from "@/lib/fixtures";
 
-type ApiMatch = { id: number; utcDate: string | null; status: string; competition: { name: string }; homeTeam: { id: number; name: string }; awayTeam: { id: number; name: string } };
+type ApiMatch = { id: number; utcDate: string | null; status: string; competition: { name: string }; homeTeam: Team; awayTeam: Team };
 export async function GET() {
   const token = process.env.FOOTBALL_DATA_API_KEY;
   if (!token) return NextResponse.json({ error: "Match data is not configured. Try the demo or contact the site owner.", setup: true }, { status: 503 });

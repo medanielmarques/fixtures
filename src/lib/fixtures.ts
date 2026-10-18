@@ -1,10 +1,12 @@
+export type Team = { id: number; name: string; crest?: string | null };
+
 export type Fixture = {
   id: number;
   date: string;
   confirmed: boolean;
   competition: string;
-  home: { id: number; name: string };
-  away: { id: number; name: string };
+  home: Team;
+  away: Team;
 };
 export const BARCELONA = 81;
 // Editorial preset; users can customize with the opponents filter.
@@ -42,6 +44,6 @@ export function demoFixtures(): Fixture[] {
   return teams.map((team, index) => {
     const date = new Date(); date.setUTCDate(date.getUTCDate() + 7 * (index + 1)); date.setUTCHours(19, 0, 0, 0);
     const barca = { id: BARCELONA, name: "FC Barcelona" };
-    return { id: index + 1, date: date.toISOString(), confirmed: index !== 5, competition: index === 3 ? "Champions League" : "La Liga", home: index % 2 ? team : barca, away: index % 2 ? barca : team };
+    return { id: index + 1, date: date.toISOString(), confirmed: index !== 5, competition: index === 3 ? "Champions League" : "La Liga", home: { ...(index % 2 ? team : barca), crest: `https://crests.football-data.org/${index % 2 ? team.id : BARCELONA}.svg` }, away: { ...(index % 2 ? barca : team), crest: `https://crests.football-data.org/${index % 2 ? BARCELONA : team.id}.svg` } };
   });
 }
