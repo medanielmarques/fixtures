@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fixtures | Seu futebol, no seu calendário",
-  description: "Escolha os jogos que você quer acompanhar e leve para seu calendário.",
+  title: "Barcelona matches | Fixtures",
+  description: "Select Barcelona matches and export them to your calendar.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased">
       <body className="min-h-full">{children}</body>
     </html>
   );

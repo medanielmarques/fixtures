@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f8f4;
-  --foreground: #17251c;
+  --background: #fafafa;
+  --foreground: #171717;
 }
 
 @theme inline {
@@ -17,4 +17,4 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-::selection { background: #c5f277; }
+::selection { background: #e5e5e5; }
