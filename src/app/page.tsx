@@ -184,7 +184,6 @@ export default function Home() {
           {notice && <p role="status" className="mt-3 text-sm text-neutral-700">{notice}</p>}
         </div>
       </section>
-      <footer className="mt-6 text-xs text-neutral-400">Men’s first team · Data: football-data.org</footer>
     </main>
   );
 }
